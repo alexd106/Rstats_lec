@@ -1,0 +1,531 @@
+---
+title: "Simple statistics using R"
+event: "BI5009"
+date: "Autumn 2020"
+author: 
+  - "Alex Douglas"
+institute: "University of Aberdeen"
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    css: ["xaringan-themer.css", "custom.css"]
+    nature:
+      highlightStyle: github
+      highlightLanguage: ["r", "yaml", "markdown"]
+      highlightLines: true
+      highlightSpans: true
+      countIncrementalSlides: false
+      ratio: "16:9"
+---
+
+```{r setup1, include=FALSE}
+knitr::opts_chunk$set(fig.retina = 3, warning = FALSE, message = FALSE)
+```
+
+```{r setup2, include=FALSE}
+options(htmltools.dir.version = FALSE)
+```
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+style_mono_accent(
+  base_color = "#1F4257",
+  # header_font_google = google_font("Josefin Sans"),
+  # text_font_google   = google_font("Montserrat", "300", "300i"),
+  # code_font_google   = google_font("Droid Mono")
+)
+```
+
+class: title-slide, center, middle
+
+# `r rmarkdown::metadata$title`
+
+### &#183; `r rmarkdown::metadata$author` &#183;
+
+### `r rmarkdown::metadata$institute`
+
+<!--#### `r rmarkdown::metadata$event` &#183; 2019-->
+
+---
+
+class: inverse, right, bottom
+
+
+<img style="border-radius: 50%;" src="https://github.com/alexd106.png" width="200px"/>
+
+### Find me at...
+
+.medium[
+[`r icon::fa("github")` Alex Douglas](https://github.com/alexd106)  
+[`r icon::fa("twitter")` @Scedacity](https://twitter.com/scedacity)  
+[`r icon::fa("paper-plane")` a.douglas@abdn.ac.uk](mailto:a.douglas@abdn.ac.uk)
+]
+
+---
+
+class: center, middle
+
+<img src = "images/get_started.gif" width = 600px>
+
+---
+
+class: left, middle
+
+# learning outcomes
+
+.pull-left[
+.medium[
+
+- introduce you to some basic statistics in R  `r emo::ji("heavy_check_mark")`
+
+- focus on linear models `r emo::ji("heavy_check_mark")`
+
+- fit simple linear models in R `r emo::ji("heavy_check_mark")`
+
+- check linear model assumptions in R `r emo::ji("heavy_check_mark")`
+
+]
+]
+
+.pull-right[
+<img src = "images/assume.gif" width = 900px height = 275px>
+
+]
+---
+
+class: top, left
+
+# statistics using R
+
+.pull-left[
+.medium[
+- many, many statistical tests available in R 
+
+- range from the simple to the highly complex
+
+- many are included in standard base installation  of R
+
+- you can extend the range of statistics by installing additional packages
+]
+]
+
+.pull-right[
+.center[
+```{r image1, echo=FALSE, out.width= '70%'}
+knitr::include_graphics('images/stats.gif')
+```
+]
+]
+
+---
+
+background-image: url(images/clouds.gif)
+background-size: 500px
+background-position: 95% 60%
+
+class: top, left
+
+# statistics using R
+
+### an example 
+
+.pull-left[
+.medium[
+
+- does seeding clouds with dimethylsulphate alter the moisture content of clouds (can we make it rain!)
+
+- 10 random clouds were seeded and 10 random clouds unseeded
+
+-  what’s the null hypothesis?
+
+- no difference in mean moisture content between seeded and unseeded clouds
+
+]
+]
+
+---
+
+class: top, left
+
+# statistics using R
+
+.pull-left[
+.medium[
+
+- plot these data
+
+- interpretation?
+
+-  what type of statistical test do you want to use?
+
+<br>
+```{r import, echo=2, collapse=TRUE}
+clouds <- read.table('data/clouds.txt', header = TRUE)
+str(clouds)
+```
+
+]
+]
+
+.pull-right[
+.center[
+```{r plot, echo=FALSE, message=FALSE, out.width= '90%'}
+library(ggplot2)
+ggplot(clouds, aes(x = treatment, y = moisture, colour = treatment)) +
+  geom_boxplot() +
+  labs(y = "moisture content", x = "treatment") +
+  theme(legend.position = "none",
+    axis.text.x = element_text(size=16),
+    axis.text.y = element_text(size=16),
+    axis.title.x = element_text(size=18),
+    axis.title.y = element_text(size=18))
+```
+]
+]
+
+---
+
+class: left, middle
+
+# statistics using R
+
+```{r, stats1, echo=TRUE, eval=FALSE}
+t.test(clouds$moisture~clouds$treatment, var.equal=TRUE)
+
+Two Sample t-test
+
+data:  clouds$moisture by clouds$treatment
+
+t = 2.5404, df = 18, `p-value = 0.02051`
+alternative hypothesis: true difference in means is not equal to 0
+
+95 percent confidence interval:
+ 1.482679 15.657321
+
+sample estimates:
+ mean in group seeded mean in group unseeded 
+               303.63                 295.06 
+```
+.medium[
+- reject or fail to reject the null hypothesis?
+]
+---
+
+class: left, top
+
+# statistics using R
+
+.medium[
+- biological interpretation?
+
+- assumptions?
+
+ + normality within each group?
+ 
+ + equal variance between groups?
+
+- could test for normality with Shapiro-Wilks test for each group separately (I'll show you a much better ways to do this later)
+
+```{r, stats2, eval=FALSE}
+# normality for seeded streatment
+shapiro.test(clouds$moisture[clouds$treatment=="seeded"])
+
+# normality for unseeded streatment
+shapiro.test(clouds$moisture[clouds$treatment=="unseeded"])
+```
+]
+
+---
+
+class: left, top
+
+# statistics using R
+
+.medium[
+- null hypotheses? 
+]
+
+```{r, stats3, echo=TRUE, eval=FALSE}
+# normality for seeded streatment
+shapiro.test(clouds$moisture[clouds$treatment=="seeded"])
+
+	Shapiro-Wilk normality test
+
+data:  clouds$moisture[clouds$treatment == "seeded"]
+W = 0.93919, `p-value = 0.544`
+
+# normality for unseeded streatment
+shapiro.test(clouds$moisture[clouds$treatment=="unseeded"])
+
+	Shapiro-Wilk normality test
+
+data:  clouds$moisture[clouds$treatment == "unseeded"]
+W = 0.87161, `p-value = 0.1044`
+```
+
+.medium[
+- fail to reject null hypotheses for both groups, therefore not different from normal
+]
+
+---
+
+class: left, top
+
+# statistics using R
+
+.medium[
+- test equal variance using an *F* test
+
+- null hypothesis?
+
+```{r, stats4, eval=FALSE}
+var.test(clouds$moisture~clouds$treatment)
+
+	F test to compare two variances
+
+data:  clouds$moisture by clouds$treatment
+F = 0.57919, num df = 9, denom df = 9, `p-value = 0.4283`
+alternative hypothesis: true ratio of variances is not equal to 1
+95 percent confidence interval:
+ 0.1438623 2.3318107
+sample estimates:
+ratio of variances 
+         0.5791888 
+         
+```
+
+- fail to reject null hypotheses and therefore variances are equal
+]
+
+---
+
+class: left, top
+
+# linear models in R
+
+<br>
+.medium[
+
+- an alternative, but equivalent approach is to use a linear model to compare the means in each group
+
+- general linear models are generally thought of as simple models, but can be used to model a wide variety of data and exp. designs
+
+- traditionally statistics is performed (and taught) like using a recipe book (ANOVA, *t*-test, ANCOVA etc) 
+
+- general linear models provide a coherent and theoretically satisfying framework on which to conduct your analyses 
+]
+
+---
+
+background-image: url(images/mind.gif)
+background-size: 350px
+background-position: 70% 60%
+
+class: left, top
+
+# what are linear models?
+
+.pull-left[
+.medium[
+
+- *t*-test
+
+- ANOVA
+
+- factorial ANOVA
+
+- ANCOVA
+
+- linear regression
+
+- multiple regression
+
+- etc, etc
+
+]
+]
+
+---
+
+class: left, top
+
+# model formulae
+
+.medium[
+- general linear modelling is based around the concept of model formulae
+
+<br>
+.center[`response variable ~ explanatory variable(s) + error`]
+<br>
+- literally read as *‘variation in response variable modelled as a 
+  function of the explanatory variable(s) plus variation not explained
+  by the explanatory variables’*
+  
+- it's the attributes of the response and explanatory variables that determines the type of linear model fitted 
+
+.pull-left[
+`response ~ continous variable` 
+
+`response ~ categorical variable`
+]
+
+.pull-right[
+equivalent to simple linear regression
+
+equivalent to one-way ANOVA
+]
+]
+
+---
+
+class: left, top
+
+# linear modelling in R
+
+.medium[
+
+-  the function for carrying out linear regression in R is `lm()`
+
+-the response variable comes first, then the tilde `~` then the name of the explanatory variable
+
+```{r, stats5, collapse=TRUE}
+clouds.lm <- lm(moisture ~ treatment, data=clouds)
+```
+
+- how does R know that you want to perform a *t*-test (ANOVA)?
+
+```{r, stats6, collapse=TRUE}
+class(clouds$treatment)
+```
+
+- here the explanatory variable is a factor
+
+]
+
+---
+
+class: left, top
+
+# linear modelling in R
+
+.medium[
+
+- to display the ANOVA table use the `anova()` function
+
+```{r, stats7, eval=FALSE}
+anova(clouds.lm)
+
+Analysis of Variance Table
+
+Response: moisture
+          Df  Sum Sq Mean Sq F value  Pr(>F)  
+treatment  1  367.22  367.22  6.4538 `0.02051` 
+Residuals 18 1024.20   56.90                  
+```
+
+- do you notice anything familiar about the p value? 
+
+- (hint: see the output from the *t*-test we did earlier)
+]
+
+---
+
+background-image: url(images/seed_plot.png)
+background-size: 400px
+background-position: 85% 85%
+class: left, top
+
+# linear modelling in R
+
+.medium[
+- we have sufficient evidence to reject the null hypothesis (as before) 
+
+- therefore, there is a significant difference in the mean moisture content between clouds that were seeded and unseeded clouds
+
+- do we accept this inference?
+
+- what about assumptions?
+
+- we could use Shapiro-Wilks and *F* tests  
+as before
+
+- much better to assess visually by  
+plotting the residuals
+
+]
+
+---
+
+class: left, top
+
+# linear modelling in R
+
+.medium[
+- because `clouds.lm` is a linear model object we can do stuff with it
+
+- we can use the `plot()` function directly  
+to display residual plots
+
+.pull-left[
+```{r, stats8, eval=FALSE}
+par(mfrow = c(2, 2))
+plot(clouds.lm)
+```
+
+- normality assumption
+
+- equal variance assumption
+
+- unusual or influential observations
+]
+]
+
+--
+background-image: url(images/res_plots.png)
+background-size: 500px
+background-position: 95% 95%
+
+--
+background-image: url(images/res_plots_norm.png)
+background-size: 500px
+background-position: 95% 95%
+
+--
+background-image: url(images/res_plots-hetero.png)
+background-size: 500px
+background-position: 95% 95%
+
+--
+background-image: url(images/res_plots-lev.png)
+background-size: 500px
+background-position: 95% 95%
+
+---
+
+class: left, top
+
+# other linear models
+
+.medium[
+- the two sample *t*-test and a linear model with a categorical explanatory variable with 2 levels are equivalent
+
+- this concept can easily be extended
+
+.center[
+
+traditional name       |   model formula           |   R code                 |
+:----------------------|:--------------------------|:-------------------------|
+bivariate regression   |   Y ~ X1 (continuous)     |   `lm(Y ~ X)`
+one-way ANOVA          |  Y ~ X1 (categorical)     | `lm(Y ~ X)`
+two-way ANOVA          | Y ~ X1 (cat) + X2 (cat)   | `lm(Y ~ X1 + X2)` 
+ANCOVA                 | Y ~ X1 (cat) + X2 (cont)  | `lm(Y ~ X1 * X2)`
+multiple regression    | Y ~ X1 (cont) + X2 (cont) | `lm(Y ~ X1 + X2)`
+factorial ANOVA        | Y ~ X1 (cat) * X2 (cat)   | `lm(Y ~ X1 * X2)`
+]
+]
+
+---
+class: center, middle
+
+<img src = "images/fin.gif" width = 300px>

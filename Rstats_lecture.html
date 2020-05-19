@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Simple statistics using R</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Alex Douglas" />
+    <link href="libs/font-awesome/css/fontawesome-all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+    <link rel="stylesheet" href="custom.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+
+
+
+
+
+
+class: title-slide, center, middle
+
+# Simple statistics using R
+
+### &amp;#183; Alex Douglas &amp;#183;
+
+### University of Aberdeen
+
+&lt;!--#### BI5009 &amp;#183; 2019--&gt;
+
+---
+
+class: inverse, right, bottom
+
+
+&lt;img style="border-radius: 50%;" src="https://github.com/alexd106.png" width="200px"/&gt;
+
+### Find me at...
+
+.medium[
+[<i class="fab  fa-github "></i> Alex Douglas](https://github.com/alexd106)  
+[<i class="fab  fa-twitter "></i> @Scedacity](https://twitter.com/scedacity)  
+[<i class="fas  fa-paper-plane "></i> a.douglas@abdn.ac.uk](mailto:a.douglas@abdn.ac.uk)
+]
+
+---
+
+class: center, middle
+
+&lt;img src = "images/get_started.gif" width = 600px&gt;
+
+---
+
+class: left, middle
+
+# learning outcomes
+
+.pull-left[
+.medium[
+
+- introduce you to some basic statistics in R  ✔️
+
+- focus on linear models ✔️
+
+- fit simple linear models in R ✔️
+
+- check linear model assumptions in R ✔️
+
+]
+]
+
+.pull-right[
+&lt;img src = "images/assume.gif" width = 900px height = 275px&gt;
+
+]
+---
+
+class: top, left
+
+# statistics using R
+
+.pull-left[
+.medium[
+- many, many statistical tests available in R 
+
+- range from the simple to the highly complex
+
+- many are included in standard base installation  of R
+
+- you can extend the range of statistics by installing additional packages
+]
+]
+
+.pull-right[
+.center[
+&lt;img src="images/stats.gif" width="70%" /&gt;
+]
+]
+
+---
+
+background-image: url(images/clouds.gif)
+background-size: 500px
+background-position: 95% 60%
+
+class: top, left
+
+# statistics using R
+
+### an example 
+
+.pull-left[
+.medium[
+
+- does seeding clouds with dimethylsulphate alter the moisture content of clouds (can we make it rain!)
+
+- 10 random clouds were seeded and 10 random clouds unseeded
+
+-  what’s the null hypothesis?
+
+- no difference in mean moisture content between seeded and unseeded clouds
+
+]
+]
+
+---
+
+class: top, left
+
+# statistics using R
+
+.pull-left[
+.medium[
+
+- plot these data
+
+- interpretation?
+
+-  what type of statistical test do you want to use?
+
+&lt;br&gt;
+
+```r
+str(clouds)
+## 'data.frame':	20 obs. of  2 variables:
+##  $ moisture : num  301 302 299 316 307 ...
+##  $ treatment: Factor w/ 2 levels "seeded","unseeded": 1 1 1 1 1 1 1 1 1 1 ...
+```
+
+]
+]
+
+.pull-right[
+.center[
+&lt;img src="Rstats_lecture_files/figure-html/plot-1.png" width="90%" /&gt;
+]
+]
+
+---
+
+class: left, middle
+
+# statistics using R
+
+
+```r
+t.test(clouds$moisture~clouds$treatment, var.equal=TRUE)
+
+Two Sample t-test
+
+data:  clouds$moisture by clouds$treatment
+
+t = 2.5404, df = 18, `p-value = 0.02051`
+alternative hypothesis: true difference in means is not equal to 0
+
+95 percent confidence interval:
+ 1.482679 15.657321
+
+sample estimates:
+ mean in group seeded mean in group unseeded 
+               303.63                 295.06 
+```
+.medium[
+- reject or fail to reject the null hypothesis?
+]
+---
+
+class: left, top
+
+# statistics using R
+
+.medium[
+- biological interpretation?
+
+- assumptions?
+
+ + normality within each group?
+ 
+ + equal variance between groups?
+
+- could test for normality with Shapiro-Wilks test for each group separately (I'll show you a much better ways to do this later)
+
+
+```r
+# normality for seeded streatment
+shapiro.test(clouds$moisture[clouds$treatment=="seeded"])
+
+# normality for unseeded streatment
+shapiro.test(clouds$moisture[clouds$treatment=="unseeded"])
+```
+]
+
+---
+
+class: left, top
+
+# statistics using R
+
+.medium[
+- null hypotheses? 
+]
+
+
+```r
+# normality for seeded streatment
+shapiro.test(clouds$moisture[clouds$treatment=="seeded"])
+
+	Shapiro-Wilk normality test
+
+data:  clouds$moisture[clouds$treatment == "seeded"]
+W = 0.93919, `p-value = 0.544`
+
+# normality for unseeded streatment
+shapiro.test(clouds$moisture[clouds$treatment=="unseeded"])
+
+	Shapiro-Wilk normality test
+
+data:  clouds$moisture[clouds$treatment == "unseeded"]
+W = 0.87161, `p-value = 0.1044`
+```
+
+.medium[
+- fail to reject null hypotheses for both groups, therefore not different from normal
+]
+
+---
+
+class: left, top
+
+# statistics using R
+
+.medium[
+- test equal variance using an *F* test
+
+- null hypothesis?
+
+
+```r
+var.test(clouds$moisture~clouds$treatment)
+
+	F test to compare two variances
+
+data:  clouds$moisture by clouds$treatment
+F = 0.57919, num df = 9, denom df = 9, `p-value = 0.4283`
+alternative hypothesis: true ratio of variances is not equal to 1
+95 percent confidence interval:
+ 0.1438623 2.3318107
+sample estimates:
+ratio of variances 
+         0.5791888 
+```
+
+- fail to reject null hypotheses and therefore variances are equal
+]
+
+---
+
+class: left, top
+
+# linear models in R
+
+&lt;br&gt;
+.medium[
+
+- an alternative, but equivalent approach is to use a linear model to compare the means in each group
+
+- general linear models are generally thought of as simple models, but can be used to model a wide variety of data and exp. designs
+
+- traditionally statistics is performed (and taught) like using a recipe book (ANOVA, *t*-test, ANCOVA etc) 
+
+- general linear models provide a coherent and theoretically satisfying framework on which to conduct your analyses 
+]
+
+---
+
+background-image: url(images/mind.gif)
+background-size: 350px
+background-position: 70% 60%
+
+class: left, top
+
+# what are linear models?
+
+.pull-left[
+.medium[
+
+- *t*-test
+
+- ANOVA
+
+- factorial ANOVA
+
+- ANCOVA
+
+- linear regression
+
+- multiple regression
+
+- etc, etc
+
+]
+]
+
+---
+
+class: left, top
+
+# model formulae
+
+.medium[
+- general linear modelling is based around the concept of model formulae
+
+&lt;br&gt;
+.center[`response variable ~ explanatory variable(s) + error`]
+&lt;br&gt;
+- literally read as *‘variation in response variable modelled as a 
+  function of the explanatory variable(s) plus variation not explained
+  by the explanatory variables’*
+  
+- it's the attributes of the response and explanatory variables that determines the type of linear model fitted 
+
+.pull-left[
+`response ~ continous variable` 
+
+`response ~ categorical variable`
+]
+
+.pull-right[
+equivalent to simple linear regression
+
+equivalent to one-way ANOVA
+]
+]
+
+---
+
+class: left, top
+
+# linear modelling in R
+
+.medium[
+
+-  the function for carrying out linear regression in R is `lm()`
+
+-the response variable comes first, then the tilde `~` then the name of the explanatory variable
+
+
+```r
+clouds.lm &lt;- lm(moisture ~ treatment, data=clouds)
+```
+
+- how does R know that you want to perform a *t*-test (ANOVA)?
+
+
+```r
+class(clouds$treatment)
+## [1] "factor"
+```
+
+- here the explanatory variable is a factor
+
+]
+
+---
+
+class: left, top
+
+# linear modelling in R
+
+.medium[
+
+- to display the ANOVA table use the `anova()` function
+
+
+```r
+anova(clouds.lm)
+
+Analysis of Variance Table
+
+Response: moisture
+          Df  Sum Sq Mean Sq F value  Pr(&gt;F)  
+treatment  1  367.22  367.22  6.4538 `0.02051` 
+Residuals 18 1024.20   56.90                  
+```
+
+- do you notice anything familiar about the p value? 
+
+- (hint: see the output from the *t*-test we did earlier)
+]
+
+---
+
+background-image: url(images/seed_plot.png)
+background-size: 400px
+background-position: 85% 85%
+class: left, top
+
+# linear modelling in R
+
+.medium[
+- we have sufficient evidence to reject the null hypothesis (as before) 
+
+- therefore, there is a significant difference in the mean moisture content between clouds that were seeded and unseeded clouds
+
+- do we accept this inference?
+
+- what about assumptions?
+
+- we could use Shapiro-Wilks and *F* tests  
+as before
+
+- much better to assess visually by  
+plotting the residuals
+
+]
+
+---
+
+class: left, top
+
+# linear modelling in R
+
+.medium[
+- because `clouds.lm` is a linear model object we can do stuff with it
+
+- we can use the `plot()` function directly  
+to display residual plots
+
+.pull-left[
+
+```r
+par(mfrow = c(2, 2))
+plot(clouds.lm)
+```
+
+- normality assumption
+
+- equal variance assumption
+
+- unusual or influential observations
+]
+]
+
+--
+background-image: url(images/res_plots.png)
+background-size: 500px
+background-position: 95% 95%
+
+--
+background-image: url(images/res_plots_norm.png)
+background-size: 500px
+background-position: 95% 95%
+
+--
+background-image: url(images/res_plots-hetero.png)
+background-size: 500px
+background-position: 95% 95%
+
+--
+background-image: url(images/res_plots-lev.png)
+background-size: 500px
+background-position: 95% 95%
+
+---
+
+class: left, top
+
+# other linear models
+
+.medium[
+- the two sample *t*-test and a linear model with a categorical explanatory variable with 2 levels are equivalent
+
+- this concept can easily be extended
+
+.center[
+
+traditional name       |   model formula           |   R code                 |
+:----------------------|:--------------------------|:-------------------------|
+bivariate regression   |   Y ~ X1 (continuous)     |   `lm(Y ~ X)`
+one-way ANOVA          |  Y ~ X1 (categorical)     | `lm(Y ~ X)`
+two-way ANOVA          | Y ~ X1 (cat) + X2 (cat)   | `lm(Y ~ X1 + X2)` 
+ANCOVA                 | Y ~ X1 (cat) + X2 (cont)  | `lm(Y ~ X1 * X2)`
+multiple regression    | Y ~ X1 (cont) + X2 (cont) | `lm(Y ~ X1 + X2)`
+factorial ANOVA        | Y ~ X1 (cat) * X2 (cat)   | `lm(Y ~ X1 * X2)`
+]
+]
+
+---
+class: center, middle
+
+&lt;img src = "images/fin.gif" width = 300px&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLanguage": ["r", "yaml", "markdown"],
+"highlightLines": true,
+"highlightSpans": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

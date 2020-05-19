@@ -1,0 +1,41 @@
+/* Extra CSS */
+a, a > code {
+  color: #E7553C;
+}
+
+/* unvisited link */
+a:link {
+    color: #E7553C;
+    text-decoration: underline;
+}
+
+/* visited link */
+a:visited {
+    color: #E7553C;
+    text-decoration: underline;
+}
+
+.title-slide h1 {
+  font-size: 4em;
+  padding-top: .1em;
+  line-height: 1em;
+  padding-bottom: .1em;
+  word-wrap: break-word;
+  margin-bottom: 5px;
+}
+
+.title-slide h2 {
+  font-size: 2.5em;
+  color: #FFFFFF;
+  text-shadow: none;
+  padding-top: .1em;
+  margin-top: 0px;
+  margin-bottom: 100px;
+}
+
+.largest {font-size: 235% }
+.large { font-size: 170% }
+.medium { font-size: 120% }
+.small { font-size: 70% }
+
+.red { color: red}
