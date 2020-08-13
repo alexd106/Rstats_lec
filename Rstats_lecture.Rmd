@@ -57,9 +57,9 @@ class: inverse, right, bottom
 ### Find me at...
 
 .medium[
-[`r icon::fa("github")` Alex Douglas](https://github.com/alexd106)  
-[`r icon::fa("twitter")` @Scedacity](https://twitter.com/scedacity)  
-[`r icon::fa("paper-plane")` a.douglas@abdn.ac.uk](mailto:a.douglas@abdn.ac.uk)
+[`r icon::fontawesome("github")` Alex Douglas](https://github.com/alexd106)  
+[`r icon::fontawesome("twitter")` @Scedacity](https://twitter.com/scedacity)  
+[`r icon::fontawesome("paper-plane")` a.douglas@abdn.ac.uk](mailto:a.douglas@abdn.ac.uk)
 ]
 
 ---
